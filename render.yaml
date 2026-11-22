@@ -1,0 +1,29 @@
+# Render Blueprint —— 让"换平台"变成点两下。
+#
+# 用法（不需要 GitHub 账号）：
+#   Render Dashboard → New → Blueprint → 填我们的公开仓库地址：
+#     https://huggingface.co/spaces/gloam05/litpilot
+#   → Apply。Render 读这个文件建服务，然后只问你要两个值（key 和口令）。
+#
+# 为什么能这么干：HF Space 本质是个公开 git 仓库，里面就有 Dockerfile；
+# Render 的 Blueprint 接受任意 public git URL，因此不必把代码再搬到 GitHub。
+services:
+  - type: web
+    name: litpilot
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    # 我们只提供 http，TLS 由平台终结；容器读 $PORT（Dockerfile 里已展开）。
+    healthCheckPath: /api/health
+    envVars:
+      # sync: false = 值不进仓库，创建时由 Render 弹窗让你填。
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: LITPILOT_SHARE_TOKEN
+        sync: false
+      # 这两个是防刷的闸，写死即可（见 docs/部署.md §1）。
+      - key: LITPILOT_RUN_BUDGET
+        value: "40"
+      - key: LITPILOT_MAX_CONCURRENT
+        value: "1"

@@ -1,0 +1,43 @@
+# Fly.io config. `fly launch --no-deploy` will otherwise generate its own and
+# overwrite this one — pass --copy-config or answer "no" to edit.
+app = "litpilot"
+primary_region = "hkg"          # Hong Kong: lowest latency from mainland China
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  LITPILOT_MOCK = "0"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Suspend when idle (a demo URL idles most of the day), wake on the next request.
+  # A live SSE run keeps it awake for its whole duration, which is what we want.
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 60
+    soft_limit = 40
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# Persistence: without this, every redeploy and every idle-suspend loses data/runs,
+# so old trace replay links 404. Mount it and set LITPILOT_DATA=/app/data.
+#   fly volumes create litpilot_data --region hkg --size 1
+# [mounts]
+#   source = "litpilot_data"
+#   destination = "/app/data"

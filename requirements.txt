@@ -1,0 +1,28 @@
+# Exact versions we ran offline and live (Windows, Python 3.12.14). Pinned on
+# purpose: a demo that silently upgrades starlette the night before is a demo that
+# breaks the night before.
+#
+# Direct dependencies:
+fastapi==0.165.0
+uvicorn==0.54.0
+httpx==0.28.1
+pypdf==7.1.1
+python-dotenv==1.2.4
+
+# Transitive, pinned because pip would otherwise pick these and we have not tested
+# other combinations:
+starlette==1.10.0
+pydantic==2.14.4
+pydantic_core==2.50.5
+annotated-doc==0.0.7
+annotated-types==0.8.0
+typing-inspection==0.4.5
+opentelemetry-api==1.45.2
+anyio==4.16.0
+httpcore==1.0.9
+h11==0.16.0
+certifi==2026.11.20
+idna==3.20
+click==8.5.1
+typing_extensions==4.16.0
+exceptiongroup==1.3.2

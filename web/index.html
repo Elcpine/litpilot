@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LitPilot · 文献综述智能体</title>
+<link rel="stylesheet" href="/web/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="mark">LP</span>
+    <div>
+      <h1>LitPilot</h1>
+      <p>文献综述智能体 · 每条结论都能翻回原文</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <label class="switch" title="mock 模式使用离线语料，断网也能演示">
+      <input type="checkbox" id="mockToggle" checked />
+      <span class="slider"></span>
+      <span class="switch-label">离线语料</span>
+    </label>
+    <a class="dl" id="downloadLink" href="/download/litpilot.zip" title="整个项目打包下载（不含 .env）">下载源码包</a>
+    <span class="pill" id="healthPill">连接中…</span>
+  </div>
+</header>
+
+<section class="controls">
+  <input id="topic" type="text" spellcheck="false"
+         value="面向长文档的检索增强生成中片段切分与重排序的对比研究"
+         placeholder="输入一个研究题目，例如：检索增强生成中的片段切分策略对比" />
+  <button id="runBtn" class="primary">运行</button>
+  <label class="check" title="第三篇论文首次下载超时，用于演示降级与重试">
+    <input type="checkbox" id="faultToggle" checked /> 注入一次下载超时
+  </label>
+  <select id="history" title="回放历史运行">
+    <option value="">历史运行…</option>
+  </select>
+</section>
+
+<main class="grid">
+  <section class="panel trace-panel">
+    <div class="panel-head">
+      <h2>执行轨迹 <span class="muted">trace · JSONL 可回放</span></h2>
+      <span class="counter" id="stepCounter">0 步</span>
+    </div>
+    <ol class="trace" id="trace"></ol>
+    <div class="trace-empty" id="traceEmpty">
+      点「运行」，每一步都会出现在这里：<br />
+      规划 → 检索 → 下载 → 解析 → 抽取 → 校验 → 成表 → 复核。
+    </div>
+  </section>
+
+  <section class="right-col">
+    <div class="metrics" id="metrics">
+      <div class="card">
+        <span class="k">引用可核对率 CCR</span>
+        <strong id="mCcr">—</strong>
+        <span class="sub" id="mCcrSub">未运行</span>
+      </div>
+      <div class="card">
+        <span class="k">字段完整率</span>
+        <strong id="mField">—</strong>
+        <span class="sub" id="mFieldSub">method + dataset + metric</span>
+      </div>
+      <div class="card">
+        <span class="k">证据等级分布</span>
+        <div class="levels" id="mLevels">
+          <span class="lv lv-A">A 0</span><span class="lv lv-B">B 0</span>
+          <span class="lv lv-C">C 0</span><span class="lv lv-D">D 0</span>
+        </div>
+        <span class="sub" id="mLevelsSub">A 逐字命中 / B 近似 / C 不可核对</span>
+      </div>
+      <div class="card">
+        <span class="k">失败与重试</span>
+        <strong id="mFail">—</strong>
+        <span class="sub" id="mFailSub">全部可见</span>
+      </div>
+    </div>
+
+    <div class="panel table-panel">
+      <div class="panel-head">
+        <h2>横向对比表 <span class="muted">字段对齐 · 不相似度检索</span></h2>
+        <span class="counter" id="rowCounter">0 篇</span>
+      </div>
+      <div class="table-scroll">
+        <table id="table">
+          <thead>
+            <tr>
+              <th>论文</th><th>方法路线</th><th>数据集</th><th>报告指标</th><th>证据</th><th>结论</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="trace-empty" id="tableEmpty">运行后这里会出现 method / dataset / metric 三列对齐的对比表。</div>
+      </div>
+      <div class="conclusion" id="conclusion" hidden></div>
+    </div>
+
+    <div class="panel evidence-panel" id="evidencePanel" hidden>
+      <div class="panel-head">
+        <h2 id="evTitle">证据明细</h2>
+        <button class="ghost" id="evClose">收起</button>
+      </div>
+      <div id="evBody" class="ev-body"></div>
+    </div>
+  </section>
+</main>
+
+<script src="/web/app.js"></script>
+</body>
+</html>
